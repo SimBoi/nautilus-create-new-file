@@ -2,7 +2,7 @@ import gi
 gi.require_version("Nautilus", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version("Gtk", "4.0")
-from gi.repository import GObject, Adw, Gtk, Nautilus
+from gi.repository import GObject, Adw, Gtk, Nautilus, Gio, GLib
 
 
 class CreateFileDialog(Adw.Dialog):
@@ -61,11 +61,24 @@ class CreateFileDialog(Adw.Dialog):
             file_name = f"{base_name}_{counter}{ext}"
             counter += 1
 
-        # create the file using subprocess to call touch command
-        import subprocess
-        subprocess.run(["touch", f"{self.target_dir}/{file_name}"])
-
+        # create the file via GIO
+        final_path = os.path.join(self.target_dir, file_name)
+        gfile = Gio.File.new_for_path(final_path)
+        gfile.replace_contents(b"", None, False, Gio.FileCreateFlags.NONE, None)
         self.close()
+        
+        # select file via D-Bus
+        uri = gfile.get_uri()
+        def _select():
+            GLib.spawn_async(
+                ['gdbus','call','--session',
+                 '--dest','org.freedesktop.FileManager1',
+                 '--object-path','/org/freedesktop/FileManager1',
+                 '--method','org.freedesktop.FileManager1.ShowItems',
+                 f"['{uri}']", "''"],
+                flags=GLib.SpawnFlags.SEARCH_PATH)
+            return False
+        GLib.timeout_add(100, _select)
 
 
 class CreateFileExtension(GObject.GObject, Nautilus.MenuProvider):
