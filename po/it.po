@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-14 12:24+0200\n"
+"PO-Revision-Date: 2025-09-14 12:27+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.7\n"
+
+#: nautilus-create-new-file.py:23
+msgid "New File"
+msgstr "Nuovo file"
+
+#: nautilus-create-new-file.py:43
+msgid "File Name"
+msgstr "Nome del file"
+
+#: nautilus-create-new-file.py:49
+msgid "Create"
+msgstr "Crea"
+
+#: nautilus-create-new-file.py:83
+msgid "New File…"
+msgstr "Nuovo file…"
