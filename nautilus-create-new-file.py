@@ -4,6 +4,32 @@ gi.require_version("Adw", "1")
 gi.require_version("Gtk", "4.0")
 from gi.repository import GObject, Adw, Gtk, Nautilus, Gio, GLib
 
+# L10n
+import gettext, locale, os, polib
+
+base_dir = os.path.dirname(__file__)
+locale_dir = os.path.join(base_dir, "nautilus-create-new-file-translations")
+
+lang = locale.getlocale()[0]
+po_path = os.path.join(locale_dir, f"{lang}.po")
+if not os.path.exists(po_path) and "_" in lang:
+    lang = lang.split("_")[0]
+    po_path = os.path.join(locale_dir, f"{lang}.po")
+mo_path = os.path.join(locale_dir, f"{lang}.mo")
+
+if os.path.exists(po_path):
+    # Compile .po to .mo if needed
+    if not os.path.exists(mo_path):
+        po = polib.pofile(po_path)
+        po.save_as_mofile(mo_path)
+    # Load translations
+    with open(mo_path, "rb") as f_mo:
+        trans = gettext.GNUTranslations(f_mo)
+    _ = trans.gettext
+else:
+    # Fallback to no translation
+    _ = lambda x: x
+
 
 class CreateFileDialog(Adw.Dialog):
     def __init__(self, folder: Nautilus.FileInfo):
@@ -12,7 +38,7 @@ class CreateFileDialog(Adw.Dialog):
         self.target_dir = folder.get_location().get_path()
 
         # Set up the dialog properties
-        self.set_title("New File")
+        self.set_title(_("New File"))
         self.set_content_width(450)
         root = Adw.ToolbarView()
         header_bar = Adw.HeaderBar()
@@ -32,13 +58,13 @@ class CreateFileDialog(Adw.Dialog):
         body.append(list_box)
 
         # Create the entry for the file name
-        self.file_name = Adw.EntryRow(title="File Name")
+        self.file_name = Adw.EntryRow(title=_("File Name"))
         list_box.append(self.file_name)
         self.file_name.connect("entry-activated", lambda *_: self.creaet_file())
 
         # Create submit button to call the creaet_file method
         self.submit_button = Gtk.Button(
-            label="Create",
+            label=_("Create"),
             css_classes=["pill", "suggested-action"],
             halign=Gtk.Align.CENTER,
             margin_top=8,
@@ -85,7 +111,7 @@ class CreateFileExtension(GObject.GObject, Nautilus.MenuProvider):
     def get_background_items(self, folder: Nautilus.FileInfo):
         menu_item = Nautilus.MenuItem(
             name="CreateFileExtension::CreateFile",
-            label="New File…",
+            label=_("New File…"),
         )
         menu_item.connect(
             "activate",
