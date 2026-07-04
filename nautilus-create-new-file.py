@@ -1,3 +1,5 @@
+keybind = "<Primary><Alt>n"
+
 import gi
 from gi.repository import GObject, Adw, Gtk, Nautilus, Gio, GLib
 
@@ -105,7 +107,30 @@ class CreateFileDialog(Adw.Dialog):
 
 
 class CreateFileExtension(GObject.GObject, Nautilus.MenuProvider):
+    def __init__(self):
+        super().__init__()
+        self.folder_for_window = {}
+
     def get_background_items(self, folder: Nautilus.FileInfo):
+        windows = set()
+
+        for window in Gtk.Window.get_toplevels():
+            windows.add(window)
+            if not window.is_active():
+                continue
+            self.folder_for_window[window] = folder
+            if window.lookup_action("create-file") is None:
+                action = Gio.SimpleAction.new("create-file", None)
+                action.connect("activate", self.action_activated)
+                window.add_action(action)
+                window.get_application().set_accels_for_action(
+                    "win.create-file",
+                    [keybind]
+                )
+        for old in list(self.folder_for_window):
+            if old not in windows:
+                del self.folder_for_window[old]
+
         menu_item = Nautilus.MenuItem(
             name="CreateFileExtension::CreateFile",
             label=_("New File…"),
@@ -118,3 +143,11 @@ class CreateFileExtension(GObject.GObject, Nautilus.MenuProvider):
         return [
             menu_item,
         ]
+
+    def action_activated(self, action, parameter):
+        for window in Gtk.Window.get_toplevels():
+            if window.is_active():
+                folder = self.folder_for_window.get(window)
+                if folder is not None:
+                    CreateFileDialog(folder).present(window)
+                break
